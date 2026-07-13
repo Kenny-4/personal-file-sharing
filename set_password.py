@@ -1,6 +1,7 @@
 from getpass import getpass
 from werkzeug.security import generate_password_hash
 import os
+import secrets
 
 # If .env file doesn't exist, create it, otherwise write generated password
 if not os.path.exists('.env'):
@@ -10,6 +11,7 @@ if not os.path.exists('.env'):
             print("Password cannot be empty. Please try again.")
             exit()
         f.write(f"PASSWORD={generate_password_hash(pw)}\n")
+        f.write(f"SECRET_KEY={secrets.token_hex(32)}\n")
         os.chmod('.env', 0o600) # Set file permissions to read/write for owner only
         print("Password set successfully.")
 else:
@@ -23,7 +25,8 @@ else:
                     print("Password cannot be empty. Please try again.")
                     exit()
                 f.write(f"PASSWORD={generate_password_hash(pw)}\n")
-                break
+            if line.startswith('SECRET_KEY='):
+                f.write(f"SECRET_KEY={secrets.token_hex(32)}\n")
             else:
                 f.write(line)
     os.chmod('.env', 0o600)  # Set file permissions to read/write for owner only

@@ -1,9 +1,8 @@
-
+from main import app, BASE_DIR, UPLOAD_DIR
 from flask import abort, redirect, render_template, request, send_from_directory, url_for, session
 from db import insert_file, get_files, get_file_by_id, delete_file
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
-from main import app, BASE_DIR, UPLOAD_DIR
 from functools import wraps
 import logging
 import os
