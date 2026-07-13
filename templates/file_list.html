@@ -1,0 +1,34 @@
+<h1>My Files</h1>
+
+<form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button type="submit">Upload</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th>Size</th>
+            <th>Date Uploaded</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for file in files %}
+        <tr>
+            <td>{{ file["filename"] }}</td>
+            <td>{{ file["size"] }}</td>
+            <td>{{ file["date_uploaded"] }}</td>
+            <td>
+                <form action="/download/{{ file['id'] }}" method="GET" style="display:inline;">
+                    <button type="submit">Download</button>
+                </form>
+                <form action="/delete/{{ file['id'] }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this file?');">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

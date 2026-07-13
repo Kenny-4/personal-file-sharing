@@ -4,16 +4,21 @@ from werkzeug.utils import secure_filename
 from main import app
 from db import insert_file, get_files, get_file_by_id, delete_file
 import os
+import logging
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
 
+logging.basicConfig(
+    filename='activity.log',
+    level=logging.INFO,
+    format='%(asctime)s %(message)s'
+)
 # Homepage showing all files
 @app.route('/', methods=['GET'])
 def list_files():
     files = get_files()
     return render_template('file_list.html', files=files)
-
 
 # File upload route
 @app.route('/upload', methods=['POST'])
@@ -22,6 +27,7 @@ def upload_file():
     upload_path = os.path.join(UPLOAD_DIR, sanitized_name)
     request.files['file'].save(upload_path)  # Save the file
     insert_file(sanitized_name, os.path.getsize(upload_path)) # Inserts into DB
+    logging.info(f"| IP={request.remote_addr} | Upload | {sanitized_name}")
     return redirect(url_for('list_files'))  # Redirect to the list of files
 
 # File download Route
@@ -30,6 +36,7 @@ def download_file(file_id):
     file_record = get_file_by_id(file_id)
     if file_record is None:
         abort(404)
+    logging.info(f"| IP={request.remote_addr} | Download | {file_record['filename']}")
     return send_from_directory(UPLOAD_DIR, file_record["filename"], as_attachment=True)
 
 # File deletion route
@@ -40,6 +47,7 @@ def purge_file(file_id):
         abort(404)
     os.remove(os.path.join(UPLOAD_DIR, file_record["filename"]))
     delete_file(file_id)
+    logging.info(f"| IP={request.remote_addr} | Delete | {file_record['filename']}")
     return redirect(url_for('list_files'))
 
 

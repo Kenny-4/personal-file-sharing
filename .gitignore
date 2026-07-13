@@ -1,1 +1,5 @@
 venv
+*.log
+uploads/*
+!uploads/.gitkeep
+*db
