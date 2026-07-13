@@ -1,27 +1,53 @@
 
-from flask import abort, redirect, render_template, request, send_from_directory, url_for
-from werkzeug.utils import secure_filename
-from main import app
+from flask import abort, redirect, render_template, request, send_from_directory, url_for, session
 from db import insert_file, get_files, get_file_by_id, delete_file
-import os
+from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+from main import app, BASE_DIR, UPLOAD_DIR
+from functools import wraps
 import logging
+import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
-
+# Configure logging
 logging.basicConfig(
     filename='activity.log',
     level=logging.INFO,
     format='%(asctime)s %(message)s'
 )
-# Homepage showing all files
+
+# Login check wrapper
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# File list route
 @app.route('/', methods=['GET'])
+@login_required
 def list_files():
     files = get_files()
     return render_template('file_list.html', files=files)
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        submitted_password = request.form.get('password')
+        stored_hash = os.getenv('PASSWORD')
+        if check_password_hash(stored_hash, submitted_password):
+            session['authenticated'] = True
+            logging.info(f"| IP={request.remote_addr} | Login Success")
+            return redirect(url_for('list_files'))
+        else:
+            logging.info(f"| IP={request.remote_addr} | Login Failure")
+            return render_template('login.html', error=True)
+    return render_template('login.html')
+
 # File upload route
 @app.route('/upload', methods=['POST'])
+@login_required
 def upload_file():
     sanitized_name = secure_filename(request.files['file'].filename)
     upload_path = os.path.join(UPLOAD_DIR, sanitized_name)
@@ -32,6 +58,7 @@ def upload_file():
 
 # File download Route
 @app.route('/download/<int:file_id>', methods=['GET'])
+@login_required
 def download_file(file_id):
     file_record = get_file_by_id(file_id)
     if file_record is None:
@@ -41,6 +68,7 @@ def download_file(file_id):
 
 # File deletion route
 @app.route('/delete/<int:file_id>', methods=['POST'])
+@login_required
 def purge_file(file_id):
     file_record = get_file_by_id(file_id)
     if file_record is None:
