@@ -23,6 +23,7 @@ def insert_file(filename: str, size: int) -> int:
 # Get all files' metadata from db
 def get_files() -> list[tuple]:
     conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM files")
     files = cursor.fetchall()
@@ -32,6 +33,7 @@ def get_files() -> list[tuple]:
 # Get a specific file's metadata from db
 def get_file_by_id(file_id: int) -> tuple | None:
     conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM files WHERE id = ?", (file_id,))
     file = cursor.fetchone()
