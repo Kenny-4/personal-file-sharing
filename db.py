@@ -39,3 +39,11 @@ def get_file_by_id(file_id: int) -> tuple | None:
     file = cursor.fetchone()
     conn.close()
     return file
+
+# Delete a specific file's metadata from db
+def delete_file(file_id: int) -> None:
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM files WHERE id = ?", (file_id,))
+    conn.commit()
+    conn.close()
