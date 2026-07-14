@@ -11,8 +11,8 @@ A personal file-sharing web app that can upload, list, download, and delete file
 ## Setup
 ### 1. Clone Repository
 ```bash
-git clone <your-repo-url>
-cd <your-project-folder>
+git clone <https://github.com/Kenny-4/personal-file-sharing>
+#cd <your-project-folder>
 ```
 ### 2. Create and activate a python virtual environment
 
