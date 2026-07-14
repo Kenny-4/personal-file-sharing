@@ -1,4 +1,4 @@
-from main import app, BASE_DIR, UPLOAD_DIR
+from __main__ import app, BASE_DIR, UPLOAD_DIR
 from flask import abort, redirect, render_template, request, send_from_directory, url_for, session
 from db import insert_file, get_files, get_file_by_id, delete_file
 from werkzeug.security import check_password_hash
@@ -30,6 +30,7 @@ def list_files():
     files = get_files()
     return render_template('file_list.html', files=files)
 
+# Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -76,5 +77,6 @@ def purge_file(file_id):
     delete_file(file_id)
     logging.info(f"| IP={request.remote_addr} | Delete | {file_record['filename']}")
     return redirect(url_for('list_files'))
+
 
 
